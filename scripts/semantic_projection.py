@@ -2,10 +2,10 @@
 """Deterministic semantic-graph projection with a non-authoritative receipt.
 
 Diagram Design is a rendering surface.  This utility makes that boundary
-machine-checkable: every projected node must already exist in the admitted
+machine-checkable: every projected node must already exist in the supplied
 source graph, edges are retained only when both endpoints survive selection,
 and the emitted receipt binds source and projection identities without
-claiming actuation authority.
+claiming source admission or actuation authority.
 """
 
 from __future__ import annotations
@@ -56,10 +56,18 @@ def project_graph(
     graph: Mapping[str, Any],
     selected_ids: Iterable[str],
 ) -> Dict[str, Any]:
-    """Project an admitted graph without inventing nodes or relationships."""
+    """Project a supplied graph without inventing nodes or relationships.
+
+    Source admission is intentionally outside this function.  The returned
+    receipt therefore reports ``PARTIAL_ALIVE`` even though the projection
+    computation itself is deterministic and verified against source identity.
+    """
 
     indexed = _index_nodes(graph)
     requested = list(dict.fromkeys(selected_ids))
+    if not all(isinstance(node_id, str) and node_id for node_id in requested):
+        raise ProjectionRefusal("selection must contain non-empty string node ids")
+
     missing = [node_id for node_id in requested if node_id not in indexed]
     if missing:
         raise ProjectionRefusal(
@@ -93,7 +101,8 @@ def project_graph(
         "edges": edges,
     }
     receipt = {
-        "status": "ALIVE",
+        "status": "PARTIAL_ALIVE",
+        "source_admission_required": True,
         "source_digest": _digest(graph),
         "projection_digest": _digest(projection),
         "selected_node_ids": requested,
@@ -113,7 +122,7 @@ def _load_ids(path: Path) -> Sequence[str]:
 
 def main() -> int:
     parser = argparse.ArgumentParser(
-        description="Project an admitted semantic graph and emit a deterministic receipt."
+        description="Project a semantic graph and emit a deterministic non-authoritative receipt."
     )
     parser.add_argument("graph", type=Path, help="JSON graph containing nodes and edges")
     parser.add_argument("selection", type=Path, help="JSON array of selected node ids")
