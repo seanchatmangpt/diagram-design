@@ -29,20 +29,27 @@ GRAPH = {
 
 
 class SemanticProjectionTests(unittest.TestCase):
-    def test_projection_preserves_source_identity(self):
+    def test_projection_preserves_source_identity_without_claiming_admission(self):
         result = project_graph(GRAPH, ["ontology:Customer", "ontology:Order"])
         projection = result["projection"]
+        receipt = result["receipt"]
         self.assertEqual(
             [node["id"] for node in projection["nodes"]],
             ["ontology:Customer", "ontology:Order"],
         )
         self.assertEqual([edge["id"] for edge in projection["edges"]], ["edge:places"])
-        self.assertEqual(result["receipt"]["invented_node_count"], 0)
-        self.assertFalse(result["receipt"]["actuation_authority"])
+        self.assertEqual(receipt["invented_node_count"], 0)
+        self.assertEqual(receipt["status"], "PARTIAL_ALIVE")
+        self.assertTrue(receipt["source_admission_required"])
+        self.assertFalse(receipt["actuation_authority"])
 
     def test_unknown_node_is_refused_instead_of_invented(self):
         with self.assertRaises(ProjectionRefusal):
             project_graph(GRAPH, ["ontology:Customer", "invented:Thing"])
+
+    def test_non_string_selection_is_refused(self):
+        with self.assertRaises(ProjectionRefusal):
+            project_graph(GRAPH, ["ontology:Customer", 42])
 
     def test_dangling_source_edge_is_refused(self):
         graph = dict(GRAPH)
