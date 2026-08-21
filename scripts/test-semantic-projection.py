@@ -85,6 +85,8 @@ class SemanticProjectionTests(unittest.TestCase):
             chatman_git_subject("repository:source-ontology", "bad")
         with self.assertRaises(ProjectionRefusal):
             chatman_git_subject("SourceOntology", SHA)
+        with self.assertRaises(ProjectionRefusal):
+            chatman_git_subject("repository:sémantique", SHA)
 
     def test_unknown_node_is_refused_instead_of_invented(self):
         with self.assertRaises(ProjectionRefusal):
