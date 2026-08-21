@@ -68,15 +68,17 @@ def _validate_chatman_manifest() -> Dict[str, Any]:
 def chatman_git_subject(repository_id: str, sha: str) -> Dict[str, str]:
     """Build a canonical Chatman ``GitCommit`` exact subject."""
 
+    suffix = repository_id[len("repository:") :] if isinstance(repository_id, str) and repository_id.startswith("repository:") else ""
     valid_repository = (
-        isinstance(repository_id, str)
-        and repository_id.startswith("repository:")
-        and len(repository_id) > len("repository:")
+        bool(suffix)
         and all(
-            character.islower()
-            or character.isdigit()
-            or character in "-_"
-            for character in repository_id[len("repository:") :]
+            character.isascii()
+            and (
+                character.islower()
+                or character.isdigit()
+                or character in "-_"
+            )
+            for character in suffix
         )
     )
     valid_sha = (
@@ -85,7 +87,7 @@ def chatman_git_subject(repository_id: str, sha: str) -> Dict[str, str]:
         and all(character in "0123456789abcdefABCDEF" for character in sha)
     )
     if not valid_repository or not valid_sha:
-        raise ProjectionRefusal("Chatman exact subject requires canonical repository id and 40-hex SHA")
+        raise ProjectionRefusal("Chatman exact subject requires canonical ASCII repository id and 40-hex SHA")
     return {"kind": "git_commit", "repository": repository_id, "sha": sha.lower()}
 
 
