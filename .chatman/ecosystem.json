@@ -1,0 +1,13 @@
+{
+  "schema": "chatman-ecosystem.integration/v1",
+  "ecosystem_id": "ecosystem:chatman",
+  "control_plane_repository": "seanchatmangpt/chatman-ecosystem",
+  "control_plane_sha": "9e720d51f1a36f2ddae42dbd917eb921eb4db733",
+  "repository_id": "repository:diagram-design",
+  "role": "semantic-projection",
+  "authority_class": "observe",
+  "do_path": "broker_only",
+  "receipt_policy": "required_for_mutation",
+  "exact_subject_kind": "git_commit",
+  "standing_ceiling": "PARTIAL_ALIVE"
+}
