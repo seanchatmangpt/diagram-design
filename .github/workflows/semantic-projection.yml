@@ -1,0 +1,25 @@
+name: Semantic Projection Contract
+
+on:
+  pull_request:
+    branches: [main]
+    paths:
+      - "scripts/semantic_projection.py"
+      - "scripts/test-semantic-projection.py"
+      - ".github/workflows/semantic-projection.yml"
+
+permissions:
+  contents: read
+
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          persist-credentials: false
+      - uses: actions/setup-python@v7
+        with:
+          python-version: "3.11"
+      - name: Prove source-bounded deterministic projection
+        run: python scripts/test-semantic-projection.py
