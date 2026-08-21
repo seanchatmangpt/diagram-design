@@ -1,9 +1,10 @@
-name: Semantic Projection Contract
+name: Chatman Semantic Projection Contract
 
 on:
   pull_request:
     branches: [main]
     paths:
+      - ".chatman/ecosystem.json"
       - "scripts/semantic_projection.py"
       - "scripts/test-semantic-projection.py"
       - ".github/workflows/semantic-projection.yml"
@@ -21,5 +22,5 @@ jobs:
       - uses: actions/setup-python@v7
         with:
           python-version: "3.11"
-      - name: Prove source-bounded deterministic projection
+      - name: Prove source-bounded Chatman projection
         run: python scripts/test-semantic-projection.py
